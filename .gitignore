@@ -1,0 +1,17 @@
+# File konfigurasi lokal
+.env
+
+# Database lokal
+*.sql
+
+# File log
+*.log
+
+# File temporary
+*.tmp
+
+# VS Code
+.vscode/
+
+# Windows
+Thumbs.db

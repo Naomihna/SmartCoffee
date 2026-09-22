@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f7f1e8;
+    color: #342116;
+}
+
+
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar {
+    height: 80px;
+    padding: 0 7%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: #f7f1e8;
+}
+
+
+.logo {
+    font-size: 22px;
+    font-weight: 700;
+    color: #4a2d1d;
+}
+
+
+.logo span {
+    margin-right: 7px;
+}
+
+
+.navbar nav {
+    display: flex;
+    gap: 35px;
+}
+
+
+.navbar nav a {
+    text-decoration: none;
+    color: #70594b;
+    font-size: 14px;
+    transition: .3s;
+}
+
+
+.navbar nav a:hover,
+.navbar nav a.active {
+    color: #9a5b32;
+}
+
+
+.login-btn {
+    text-decoration: none;
+    background: #4a2d1d;
+    color: white;
+    padding: 12px 23px;
+    border-radius: 30px;
+    font-size: 14px;
+}
+
+
+/* =========================
+   HERO
+========================= */
+
+.hero {
+    min-height: 650px;
+    padding: 70px 7%;
+
+    display: flex ;
+    
