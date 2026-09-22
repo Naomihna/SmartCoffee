@@ -19,7 +19,7 @@ require_once "config/database.php";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Judul website -->
-    <title>SmartCoffee | Smart Multimedia Coffee Shop</title>
+    <title>OldMoneyCoffee | Smart Multimedia Coffee Shop</title>
 
 
     <!-- ==========================================
@@ -780,7 +780,7 @@ require_once "config/database.php";
 
         <!-- Logo -->
         <a href="index.php" class="logo">
-            ☕ SmartCoffee
+            ☕ OldMoneyCoffee
         </a>
 
         <!-- Navigasi -->
@@ -823,7 +823,7 @@ require_once "config/database.php";
         <div class="hero-content">
 
             <p class="hero-label">
-                WELCOME TO SMARTCOFFEE
+                WELCOME TO OLD MONEY COFFEE
             </p>
 
             <h1>
@@ -1258,7 +1258,7 @@ require_once "config/database.php";
         </p>
 
         <p class="copyright">
-            © 2026 SmartCoffee. All Rights Reserved.
+            © 2026 OldMoneyCoffee. All Rights Reserved.
         </p>
 
     </footer>
