@@ -1014,78 +1014,64 @@ $userName = $_SESSION['user_name'] ?? '';
 <script>
 
 // ==========================================================
-// DROPDOWN PROFILE CUSTOMER
+// DROPDOWN PROFILE
 // ==========================================================
 
 function toggleProfile() {
 
-    // Mengambil elemen dropdown
     const dropdown =
-        document.getElementById(
-            "profileDropdown"
-        );
+        document.getElementById("profileDropdown");
 
-    // Membuka / menutup dropdown
     dropdown.classList.toggle("show");
 
 }
 
 
+// ==========================================================
+// MENUTUP DROPDOWN JIKA KLIK DI LUAR
+// ==========================================================
+
+document.addEventListener("click", function(event) {
+
+    const profile =
+        document.querySelector(".profile-wrapper");
+
+    const dropdown =
+        document.getElementById("profileDropdown");
+
+    if (
+        profile &&
+        dropdown &&
+        !profile.contains(event.target)
+    ) {
+
+        dropdown.classList.remove("show");
+
+    }
+
+});
+
+
+// ==========================================================
+// TAMBAH PRODUK KE KERANJANG
+// ==========================================================
+
 function addToCart(productId) {
 
-    // Cek login
     <?php if (!$isLogin): ?>
 
         alert("Silakan login terlebih dahulu.");
+
         window.location.href = "login.php";
+
         return;
 
     <?php endif; ?>
 
-
-    // Kirim produk ke proses keranjang
     window.location.href =
-        "user/add_to_cart.php?product_id=" + productId;
+        "user/keranjang.php?action=add&id=" + productId;
 
 }
-
-</script>
-
-// ==========================================================
-// MENUTUP DROPDOWN KETIKA KLIK DI LUAR
-// ==========================================================
-
-document.addEventListener(
-    "click",
-    function(event) {
-
-        // Mengambil wrapper profile
-        const profile =
-            document.querySelector(
-                ".profile-wrapper"
-            );
-
-        // Mengambil dropdown
-        const dropdown =
-            document.getElementById(
-                "profileDropdown"
-            );
-
-
-        // Jika klik di luar profile
-        if (
-            profile &&
-            !profile.contains(event.target)
-        ) {
-
-            dropdown.classList.remove(
-                "show"
-            );
-
-        }
-
-    }
-);
 
 </script>
 <body>
@@ -1454,14 +1440,13 @@ document.addEventListener(
     <span class="product-price">
         Rp22.000
     </span>
-
-    <button
-        type="button"
-        class="add-button"
-        onclick="addToCart(1)"
-    >
-        +
-    </button>
+<button
+    type="button"
+    class="add-button"
+    onclick="addToCart(2)"
+>
+    +
+</button>
 
 </div>
                 </div>
@@ -1555,7 +1540,11 @@ document.addEventListener(
                             Rp25.000
                         </span>
 
-                        <button class="add-button">
+                        <button
+                            type="button"
+                            class="add-button"
+                            onclick="addToCart(3)"
+                        >
                             +
                         </button>
 
