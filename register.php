@@ -1,111 +1,134 @@
 <?php
-// ==========================================
-// KONEKSI DATABASE
-// ==========================================
+
+// ==========================================================
+// OLD MONEY COFFEE
+// REGISTER CUSTOMER
+// ==========================================================
+
+// Memanggil koneksi database
 require_once "config/database.php";
 
-// Variabel untuk menampilkan pesan
-$message = "";
-$message_type = "";
+// Memulai session
+session_start();
 
-// ==========================================
+
+// ==========================================================
 // PROSES REGISTER
-// ==========================================
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+// ==========================================================
+
+if (isset($_POST['register'])) {
 
     // Mengambil data dari form
-    $name = trim($_POST["name"]);
-    $email = trim($_POST["email"]);
-    $password = $_POST["password"];
-    $confirm_password = $_POST["confirm_password"];
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
 
-    // ==========================================
-    // VALIDASI
-    // ==========================================
 
-    if ($name === "" || $email === "" || $password === "") {
+    // ======================================================
+    // VALIDASI PASSWORD
+    // ======================================================
 
-        $message = "Semua data harus diisi.";
-        $message_type = "error";
+    if ($password !== $confirm_password) {
 
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-
-        $message = "Format email tidak valid.";
-        $message_type = "error";
-
-    } elseif ($password !== $confirm_password) {
-
-        $message = "Konfirmasi password tidak sama.";
-        $message_type = "error";
-
-    } elseif (strlen($password) < 6) {
-
-        $message = "Password minimal 6 karakter.";
-        $message_type = "error";
+        $error = "Konfirmasi password tidak sama.";
 
     } else {
 
-        // ==========================================
+        // ==================================================
         // CEK EMAIL
-        // ==========================================
+        // ==================================================
 
-        $check = $conn->prepare(
-            "SELECT id FROM users WHERE email = ?"
+        $email_safe = mysqli_real_escape_string(
+            $conn,
+            $email
         );
 
-        $check->bind_param("s", $email);
-        $check->execute();
+        $cekEmail = mysqli_query(
+            $conn,
+            "SELECT id
+             FROM users
+             WHERE email = '$email_safe'
+             LIMIT 1"
+        );
 
-        $result = $check->get_result();
 
-        if ($result->num_rows > 0) {
+        if (mysqli_num_rows($cekEmail) > 0) {
 
-            $message = "Email sudah terdaftar.";
-            $message_type = "error";
+            $error = "Email sudah terdaftar.";
 
         } else {
 
-            // ==========================================
-            // ENKRIPSI PASSWORD
-            // ==========================================
+            // ==================================================
+            // SIMPAN PASSWORD
+            // ==================================================
 
-            $hashed_password = password_hash(
+            $password_hash = password_hash(
                 $password,
                 PASSWORD_DEFAULT
             );
 
-            // ==========================================
-            // SIMPAN USER
-            // ==========================================
 
-            $stmt = $conn->prepare(
+            // Mengamankan data sebelum dimasukkan
+            $name_safe = mysqli_real_escape_string(
+                $conn,
+                $name
+            );
+
+            $password_safe = mysqli_real_escape_string(
+                $conn,
+                $password_hash
+            );
+
+
+            // ==================================================
+            // INSERT USER
+            // ==================================================
+
+            $query = mysqli_query(
+                $conn,
                 "INSERT INTO users
-                (name, email, password, role)
-                VALUES (?, ?, ?, 'user')"
+                (
+                    name,
+                    email,
+                    password,
+                    role
+                )
+                VALUES
+                (
+                    '$name_safe',
+                    '$email_safe',
+                    '$password_safe',
+                    'user'
+                )"
             );
 
-            $stmt->bind_param(
-                "sss",
-                $name,
-                $email,
-                $hashed_password
-            );
 
-            if ($stmt->execute()) {
+            // ==================================================
+            // HASIL REGISTER
+            // ==================================================
 
-                // Setelah berhasil daftar,
-                // arahkan user ke halaman login
-                header("Location: login.php?register=success");
+            if ($query) {
+
+                // Berhasil → menuju login
+                header(
+                    "Location: login.php?register=success"
+                );
+
                 exit;
 
             } else {
 
-                $message = "Registrasi gagal.";
-                $message_type = "error";
+                $error = "Registrasi gagal. Silakan coba lagi.";
+
             }
+
         }
+
     }
+
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -113,19 +136,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <head>
 
+    <!-- Pengaturan dasar -->
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <!-- Responsive -->
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>Register | SmartCoffee</title>
+    <title>
+        Register | Old Money Coffee
+    </title>
 
-
-    <!-- ==========================================
-         CSS REGISTER
-    =========================================== -->
 
     <style>
+
+        /* ==================================================
+           RESET
+        ================================================== */
 
         * {
             margin: 0;
@@ -133,146 +162,115 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             box-sizing: border-box;
         }
 
+
+        /* ==================================================
+           BODY
+        ================================================== */
+
         body {
+
             min-height: 100vh;
 
             display: flex;
+
             align-items: center;
+
             justify-content: center;
 
-            background: #f7f0e7;
+            padding: 30px;
 
-            font-family: Arial, sans-serif;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f8f2e9;
 
             color: #3b2519;
+
         }
 
-        .register-container {
-            width: 900px;
-            max-width: 92%;
 
-            min-height: 550px;
+        /* ==================================================
+           REGISTER CARD
+        ================================================== */
 
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+        .register-card {
 
-            background: white;
+            width: 100%;
+
+            max-width: 430px;
+
+            background: #fffaf4;
+
+            padding: 40px;
 
             border-radius: 25px;
 
-            overflow: hidden;
+            border: 1px solid #eadccd;
 
             box-shadow:
-                0 20px 50px rgba(60, 35, 20, 0.15);
-        }
+                0 20px 50px
+                rgba(65, 38, 20, 0.12);
 
-        /* ==========================================
-           BAGIAN GAMBAR
-        =========================================== */
-
-        .register-image {
-
-            background-image:
-                url("https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=80");
-
-            background-size: cover;
-            background-position: center;
-
-            position: relative;
-        }
-
-        .register-image::after {
-            content: "";
-
-            position: absolute;
-
-            inset: 0;
-
-            background: rgba(55, 32, 20, 0.45);
-        }
-
-        .image-text {
-
-            position: absolute;
-
-            z-index: 2;
-
-            left: 40px;
-            bottom: 40px;
-
-            color: white;
-        }
-
-        .image-text h1 {
-            font-family: Georgia, serif;
-
-            font-size: 42px;
-
-            margin-bottom: 10px;
-        }
-
-        .image-text p {
-            line-height: 1.6;
-
-            font-size: 14px;
-
-            color: #f2e8df;
         }
 
 
-        /* ==========================================
-           FORM REGISTER
-        =========================================== */
-
-        .register-form {
-
-            padding: 55px 45px;
-
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+        /* Logo */
 
         .logo {
-            color: #a45d32;
+
+            text-align: center;
+
+            font-family: Georgia, serif;
+
+            font-size: 25px;
 
             font-weight: bold;
 
+            color: #4b2e1f;
+
             margin-bottom: 10px;
+
         }
 
-        .register-form h2 {
-
-            font-family: Georgia, serif;
-
-            font-size: 34px;
-
-            margin-bottom: 8px;
-        }
 
         .subtitle {
 
-            color: #8a7667;
+            text-align: center;
+
+            color: #806f63;
 
             font-size: 13px;
 
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+
         }
 
+
+        /* ==================================================
+           FORM
+        ================================================== */
+
         .form-group {
-            margin-bottom: 16px;
+
+            margin-bottom: 18px;
+
         }
+
 
         .form-group label {
 
             display: block;
 
-            font-size: 13px;
+            font-size: 12px;
 
             font-weight: bold;
 
-            margin-bottom: 7px;
+            margin-bottom: 8px;
+
         }
+
 
         .form-group input {
 
@@ -282,17 +280,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             border: 1px solid #dfd0c3;
 
-            border-radius: 10px;
+            border-radius: 11px;
 
             outline: none;
 
-            font-size: 14px;
+            font-size: 13px;
+
         }
+
 
         .form-group input:focus {
 
             border-color: #a45d32;
+
         }
+
+
+        /* ==================================================
+           BUTTON
+        ================================================== */
 
         .register-button {
 
@@ -300,75 +306,97 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             border: none;
 
-            background: #4b2e1f;
-
-            color: white;
-
             padding: 14px;
 
             border-radius: 25px;
+
+            background: #4b2e1f;
+
+            color: white;
 
             font-weight: bold;
 
             cursor: pointer;
 
             margin-top: 5px;
+
         }
+
 
         .register-button:hover {
+
             background: #7b4a2d;
+
         }
 
-        .message {
 
-            padding: 10px;
+        /* ==================================================
+           ERROR
+        ================================================== */
 
-            border-radius: 8px;
+        .error {
+
+            background: #f4dddd;
+
+            color: #8a3939;
+
+            padding: 11px 13px;
+
+            border-radius: 10px;
 
             font-size: 12px;
 
-            margin-bottom: 15px;
+            margin-bottom: 18px;
 
-            background: #fce4e4;
-
-            color: #a52b2b;
         }
+
+
+        /* ==================================================
+           LOGIN LINK
+        ================================================== */
 
         .login-link {
 
             text-align: center;
 
-            margin-top: 20px;
+            margin-top: 22px;
 
-            font-size: 13px;
+            font-size: 12px;
 
             color: #806f63;
+
         }
 
+
         .login-link a {
+
             color: #a45d32;
 
             font-weight: bold;
+
+            text-decoration: none;
+
         }
 
 
-        /* ==========================================
-           RESPONSIVE
-        =========================================== */
+        /* ==================================================
+           BACK HOME
+        ================================================== */
 
-        @media (max-width: 700px) {
+        .back-home {
 
-            .register-container {
-                grid-template-columns: 1fr;
-            }
+            display: block;
 
-            .register-image {
-                display: none;
-            }
+            text-align: center;
 
-            .register-form {
-                padding: 40px 25px;
-            }
+            margin-top: 15px;
+
+            color: #806f63;
+
+            font-size: 11px;
+
+            text-decoration: none;
+
         }
 
     </style>
@@ -379,160 +407,169 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <body>
 
 
-    <!-- ==========================================
-         REGISTER CONTAINER
-    =========================================== -->
+    <!-- ==================================================
+         REGISTER CARD
+    ================================================== -->
 
-    <div class="register-container">
+    <div class="register-card">
 
 
-        <!-- ==========================================
-             GAMBAR
-        =========================================== -->
+        <!-- Logo -->
 
-        <div class="register-image">
+        <div class="logo">
 
-            <div class="image-text">
-
-                <h1>SmartCoffee</h1>
-
-                <p>
-                    Temukan kopi favoritmu dan
-                    dapatkan rekomendasi yang sesuai
-                    dengan selera kamu.
-                </p>
-
-            </div>
+            ☕ Old Money Coffee
 
         </div>
 
 
-        <!-- ==========================================
-             FORM
-        =========================================== -->
+        <p class="subtitle">
 
-        <div class="register-form">
+            Buat akun untuk menikmati pengalaman
+            coffee shop kami.
 
-            <div class="logo">
-                ☕ SMARTCOFFEE
+        </p>
+
+
+        <!-- ==================================================
+             ERROR MESSAGE
+        ================================================== -->
+
+        <?php if (isset($error)): ?>
+
+            <div class="error">
+
+                <?php
+                echo htmlspecialchars($error);
+                ?>
+
             </div>
 
-            <h2>
-                Buat Akun
-            </h2>
-
-            <p class="subtitle">
-                Daftar untuk mendapatkan pengalaman
-                SmartCoffee yang lebih personal.
-            </p>
+        <?php endif; ?>
 
 
-            <!-- Pesan error -->
-            <?php if ($message !== ""): ?>
+        <!-- ==================================================
+             REGISTER FORM
+        ================================================== -->
 
-                <div class="message">
-                    <?= htmlspecialchars($message) ?>
-                </div>
-
-            <?php endif; ?>
+        <form method="POST">
 
 
-            <form method="POST">
+            <!-- Nama -->
 
+            <div class="form-group">
 
-                <!-- Nama -->
-                <div class="form-group">
+                <label>
+                    Nama
+                </label>
 
-                    <label>
-                        Nama Lengkap
-                    </label>
-
-                    <input
-                        type="text"
-                        name="name"
-                        placeholder="Masukkan nama"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- Email -->
-                <div class="form-group">
-
-                    <label>
-                        Email
-                    </label>
-
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="Masukkan email"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- Password -->
-                <div class="form-group">
-
-                    <label>
-                        Password
-                    </label>
-
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="Minimal 6 karakter"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- Konfirmasi password -->
-                <div class="form-group">
-
-                    <label>
-                        Konfirmasi Password
-                    </label>
-
-                    <input
-                        type="password"
-                        name="confirm_password"
-                        placeholder="Ulangi password"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- Tombol -->
-                <button
-                    type="submit"
-                    class="register-button"
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Masukkan nama"
+                    required
                 >
-                    Daftar Sekarang
-                </button>
 
-            </form>
+            </div>
 
 
-            <!-- Link login -->
-            <p class="login-link">
+            <!-- Email -->
 
-                Sudah punya akun?
+            <div class="form-group">
 
-                <a href="login.php">
-                    Login di sini
-                </a>
+                <label>
+                    Email
+                </label>
 
-            </p>
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Masukkan email"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Password -->
+
+            <div class="form-group">
+
+                <label>
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Masukkan password"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Konfirmasi Password -->
+
+            <div class="form-group">
+
+                <label>
+                    Konfirmasi Password
+                </label>
+
+                <input
+                    type="password"
+                    name="confirm_password"
+                    placeholder="Ulangi password"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Tombol -->
+
+            <button
+                type="submit"
+                name="register"
+                class="register-button"
+            >
+
+                Daftar Sekarang
+
+            </button>
+
+
+        </form>
+
+
+        <!-- Login -->
+
+        <div class="login-link">
+
+            Sudah punya akun?
+
+            <a href="login.php">
+                Login
+            </a>
 
         </div>
+
+
+        <!-- Kembali -->
+
+        <a
+            href="index.php"
+            class="back-home"
+        >
+
+            ← Kembali ke Home
+
+        </a>
+
 
     </div>
+
 
 </body>
 

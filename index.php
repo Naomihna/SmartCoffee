@@ -7,6 +7,27 @@
 require_once "config/database.php";
 ?>
 
+<?php
+
+// ==========================================================
+// OLD MONEY COFFEE
+// SESSION CUSTOMER
+// ==========================================================
+
+// Memanggil koneksi database
+require_once "config/database.php";
+
+// Memulai session
+session_start();
+
+// Mengecek apakah user sudah login
+$isLogin = isset($_SESSION['user_id']);
+
+// Mengambil nama user dari session
+$userName = $_SESSION['user_name'] ?? '';
+
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -27,7 +48,229 @@ require_once "config/database.php";
     =========================================== -->
 
     <style>
+/* ==================================================
+   PROFILE CUSTOMER
+================================================== */
 
+.profile-wrapper {
+
+    position: relative;
+
+}
+
+
+/* Tombol profile */
+
+.profile-button {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    border: none;
+
+    background: #4b2e1f;
+
+    color: white;
+
+    padding: 10px 16px;
+
+    border-radius: 25px;
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+}
+
+
+/* Icon */
+
+.profile-icon {
+
+    width: 25px;
+
+    height: 25px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #e9c9a7;
+
+    color: #4b2e1f;
+
+    border-radius: 50%;
+
+}
+
+
+/* Panah */
+
+.profile-arrow {
+
+    font-size: 12px;
+
+}
+
+
+/* ==================================================
+   PROFILE DROPDOWN
+================================================== */
+
+.profile-dropdown {
+
+    position: absolute;
+
+    right: 0;
+
+    top: 52px;
+
+    width: 230px;
+
+    background: #fffaf4;
+
+    border: 1px solid #eadccd;
+
+    border-radius: 16px;
+
+    padding: 10px;
+
+    box-shadow:
+        0 15px 35px
+        rgba(65, 38, 20, 0.15);
+
+    display: none;
+
+    z-index: 2000;
+
+}
+
+
+/* Dropdown aktif */
+
+.profile-dropdown.show {
+
+    display: block;
+
+}
+
+
+/* Header profile */
+
+.profile-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 12px;
+
+    border-bottom: 1px solid #eadccd;
+
+    margin-bottom: 7px;
+
+}
+
+
+/* Avatar */
+
+.profile-avatar {
+
+    width: 40px;
+
+    height: 40px;
+
+    border-radius: 50%;
+
+    background: #eadccd;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 19px;
+
+}
+
+
+/* Nama */
+
+.profile-header strong {
+
+    display: block;
+
+    font-size: 13px;
+
+    color: #4b2e1f;
+
+}
+
+
+/* Role */
+
+.profile-header small {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #8b796c;
+
+    font-size: 10px;
+
+}
+
+
+/* Link dropdown */
+
+.profile-dropdown a {
+
+    display: block;
+
+    padding: 11px 12px;
+
+    border-radius: 9px;
+
+    color: #5e493b;
+
+    text-decoration: none;
+
+    font-size: 12px;
+
+}
+
+
+/* Hover */
+
+.profile-dropdown a:hover {
+
+    background: #f1e6d9;
+
+}
+
+
+/* Logout */
+
+.profile-dropdown .logout-link {
+
+    color: #a04b3d;
+
+    border-top: 1px solid #eadccd;
+
+    margin-top: 5px;
+
+}
         /* ==========================================
            RESET
         =========================================== */
@@ -768,7 +1011,83 @@ require_once "config/database.php";
 
 </head>
 
+<script>
 
+// ==========================================================
+// DROPDOWN PROFILE CUSTOMER
+// ==========================================================
+
+function toggleProfile() {
+
+    // Mengambil elemen dropdown
+    const dropdown =
+        document.getElementById(
+            "profileDropdown"
+        );
+
+    // Membuka / menutup dropdown
+    dropdown.classList.toggle("show");
+
+}
+
+
+function addToCart(productId) {
+
+    // Cek login
+    <?php if (!$isLogin): ?>
+
+        alert("Silakan login terlebih dahulu.");
+        window.location.href = "login.php";
+        return;
+
+    <?php endif; ?>
+
+
+    // Kirim produk ke proses keranjang
+    window.location.href =
+        "user/add_to_cart.php?product_id=" + productId;
+
+}
+
+</script>
+
+// ==========================================================
+// MENUTUP DROPDOWN KETIKA KLIK DI LUAR
+// ==========================================================
+
+document.addEventListener(
+    "click",
+    function(event) {
+
+        // Mengambil wrapper profile
+        const profile =
+            document.querySelector(
+                ".profile-wrapper"
+            );
+
+        // Mengambil dropdown
+        const dropdown =
+            document.getElementById(
+                "profileDropdown"
+            );
+
+
+        // Jika klik di luar profile
+        if (
+            profile &&
+            !profile.contains(event.target)
+        ) {
+
+            dropdown.classList.remove(
+                "show"
+            );
+
+        }
+
+    }
+);
+
+</script>
 <body>
 
 
@@ -804,10 +1123,106 @@ require_once "config/database.php";
 
         </nav>
 
-        <!-- Tombol login -->
-        <a href="login.php" class="login-button">
-            Login
-        </a>
+    
+        <!-- ==================================================
+     LOGIN / PROFILE CUSTOMER
+================================================== -->
+
+<?php if ($isLogin): ?>
+
+    <!-- Jika sudah login -->
+    <div class="profile-wrapper">
+
+        <button
+            class="profile-button"
+            onclick="toggleProfile()"
+        >
+
+            <!-- Icon user -->
+            <span class="profile-icon">
+                👤
+            </span>
+
+            <!-- Nama user -->
+            <span>
+                <?php
+                echo htmlspecialchars($userName);
+                ?>
+            </span>
+
+            <!-- Panah -->
+            <span class="profile-arrow">
+                ▾
+            </span>
+
+        </button>
+
+
+        <!-- Dropdown profile -->
+
+        <div
+            class="profile-dropdown"
+            id="profileDropdown"
+        >
+
+            <div class="profile-header">
+
+                <div class="profile-avatar">
+                    👤
+                </div>
+
+                <div>
+
+                    <strong>
+                        <?php
+                        echo htmlspecialchars($userName);
+                        ?>
+                    </strong>
+
+                    <small>
+                        Customer
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <a href="user/profile.php">
+                👤 Profil Saya
+            </a>
+
+
+            <a href="user/pesanan.php">
+                🛒 Pesanan Saya
+            </a>
+
+
+            <a
+                href="logout.php"
+                class="logout-link"
+            >
+                ↪ Logout
+            </a>
+
+        </div>
+
+    </div>
+
+<?php else: ?>
+
+    <!-- Jika belum login -->
+
+    <a
+        href="login.php"
+        class="login-button"
+    >
+
+        Login
+
+    </a>
+
+<?php endif; ?>
 
     </header>
 
@@ -1034,18 +1449,21 @@ require_once "config/database.php";
                         foam yang creamy.
                     </p>
 
-                    <div class="product-bottom">
+                  <div class="product-bottom">
 
-                        <span class="product-price">
-                            Rp22.000
-                        </span>
+    <span class="product-price">
+        Rp22.000
+    </span>
 
-                        <button class="add-button">
-                            +
-                        </button>
+    <button
+        type="button"
+        class="add-button"
+        onclick="addToCart(1)"
+    >
+        +
+    </button>
 
-                    </div>
-
+</div>
                 </div>
 
             </div>
@@ -1080,18 +1498,21 @@ require_once "config/database.php";
                         Espresso dengan susu
                         yang lembut dan creamy.
                     </p>
+<div class="product-bottom">
 
-                    <div class="product-bottom">
+    <span class="product-price">
+        Rp22.000
+    </span>
 
-                        <span class="product-price">
-                            Rp22.000
-                        </span>
+    <button
+        type="button"
+        class="add-button"
+        onclick="addToCart(1)"
+    >
+        +
+    </button>
 
-                        <button class="add-button">
-                            +
-                        </button>
-
-                    </div>
+</div>
 
                 </div>
 
@@ -1263,6 +1684,15 @@ require_once "config/database.php";
 
     </footer>
 
+<script>
 
+function addToCart(productId) {
+
+    window.location.href =
+        "user/keranjang.php?action=add&id=" + productId;
+
+}
+
+</script>
 </body>
 </html>
